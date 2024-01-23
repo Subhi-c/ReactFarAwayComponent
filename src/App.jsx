@@ -17,6 +17,10 @@ function App() {
       )
     );
   }
+  function clearList() {
+    const confime = window.confirm("Are you sure to delete all items ?");
+    if (confime) setItems([]);
+  }
   return (
     <>
       <div className="app">
@@ -26,6 +30,7 @@ function App() {
           items={items}
           onDeleteItem={DeleteItem}
           onToggle={toggle}
+          onclearList={clearList}
         />
         <Stats items={items} />
       </div>
@@ -75,11 +80,23 @@ function Form({ onAddItems }) {
     </form>
   );
 }
-function PackingList({ items, onDeleteItem, onToggle }) {
+function PackingList({ items, onDeleteItem, onToggle, onclearList }) {
+  const [sortBy, setsortBy] = useState("input");
+  let sortedItems;
+  if (sortBy == "input") sortedItems = items;
+  if (sortBy == "description")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localCompare(b.description));
+
+  if (sortBy == "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Item
             item={item}
             key={item.id}
@@ -88,6 +105,14 @@ function PackingList({ items, onDeleteItem, onToggle }) {
           />
         ))}
       </ul>
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setsortBy(e.target.value)}>
+          <option value="input">Sort BY input order</option>
+          {/* <option value="description">Sort BY description</option> */}
+          <option value="packed">Sort BY Packed Status</option>
+        </select>
+        <button onClick={onclearList}>Clear List</button>
+      </div>
     </div>
   );
 }
